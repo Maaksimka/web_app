@@ -1,4 +1,3 @@
-# web_app
 # Pet Project Web Application
 
 ## Описание проекта
