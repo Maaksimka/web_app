@@ -22,7 +22,7 @@ column_names = {
         "year": "Год выпуска",
         "mileage": "Пробег",
         "price": "Цена",
-        "commission": "Комиссия",
+        "commissions": "Комиссия",
         "photo": "Фото",
     },
     "Contracts": {
