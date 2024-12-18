@@ -14,63 +14,58 @@ pdfmetrics.registerFont(TTFont('DejaVu', 'DejaVuSans.ttf'))
 pdfmetrics.registerFont(TTFont('DejaVu-Bold', 'DejaVuSans-Bold.ttf'))
 
 def export_to_pdf(df):
-    """Сохранение таблицы в pdf"""
+    """Сохранение таблицы в PDF в стиле отображения"""
     # Создаем PDF-документ
     pdf_file_path = "temp_table.pdf"
     pdf = SimpleDocTemplate(pdf_file_path, pagesize=letter)
+    
+    # Заголовки и данные
+    data = [df.columns.tolist()]  # Добавляем заголовки
 
-    # Преобразуем DataFrame в список для таблицы
-    data = [df.columns.tolist()]  # Заголовки колонок
-
-    # Настройка шрифта
-    pdfmetrics.registerFont(TTFont('DejaVu', 'DejaVuSans.ttf'))  # Убедитесь, что DejaVuSans.ttf доступен
-    pdfmetrics.registerFont(TTFont('DejaVu-Bold', 'DejaVuSans-Bold.ttf'))
-
-    # Перебираем строки DataFrame и заменяем ссылки на изображения
-    for index, row in df.iterrows():
+    # Рендер данных
+    for _, row in df.iterrows():
         row_data = []
         for col in df.columns:
-            if col == 'photo':  # Столбец с изображениями
+            if col == 'photo':  # Столбец с изображением
                 img = fetch_image(row[col])
                 if img:
                     img_byte_arr = BytesIO()
                     img.save(img_byte_arr, format='PNG')
                     img_byte_arr.seek(0)
-                    pdf_image = PDFImage(img_byte_arr, width=100, height=100)  # Ограничиваем размер
+                    pdf_image = PDFImage(img_byte_arr, width=50, height=50)  # Меняем размер для PDF
                     row_data.append(pdf_image)
                 else:
                     row_data.append("No Image")
             else:
-                row_data.append(str(row[col]))  # Преобразуем другие данные в строку
+                row_data.append(str(row[col]))
         data.append(row_data)
 
-    # Создаем таблицу и настраиваем стиль
+    # Создаем таблицу с визуальным стилем
     table = Table(data)
     style = TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'DejaVu-Bold'),  # Заголовок с жирным шрифтом
-        ('FONTNAME', (0, 1), (-1, -1), 'DejaVu'),  # Основной текст с DejaVu
-        ('FONTSIZE', (0, 0), (-1, 0), 8),  # Размер шрифта заголовка
-        ('FONTSIZE', (0, 1), (-1, -1), 6),  # Размер шрифта основного текста
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),  # Цвет заголовков
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),  # Текст в заголовке
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),  # Выравнивание всех ячеек
+        ('FONTNAME', (0, 0), (-1, 0), 'DejaVu-Bold'),  # Шрифт для заголовков
+        ('FONTNAME', (0, 1), (-1, -1), 'DejaVu'),  # Шрифт для строк
+        ('FONTSIZE', (0, 0), (-1, 0), 10),  # Размер шрифта заголовка
+        ('FONTSIZE', (0, 1), (-1, -1), 8),  # Размер шрифта основного текста
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),  # Внутренний отступ заголовка
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),  # Сетка таблицы
     ])
     table.setStyle(style)
 
-    # Сохраняем PDF-документ
+    # Генерация PDF
     pdf.build([table])
 
-    # Читаем PDF-файл в байтовый поток
+    # Читаем PDF как поток байтов
     with open(pdf_file_path, 'rb') as f:
-        pdf_output = io.BytesIO(f.read())
-
-    # Удаляем временный файл
-    os.remove(pdf_file_path)
-
+        pdf_output = BytesIO(f.read())
+    
+    os.remove(pdf_file_path)  # Удаляем временный файл
+    
     return pdf_output
+
 
 
 def get_file_download_link(file_path, file_label):
