@@ -52,7 +52,7 @@ def render_custom_table(df, localized_columns=None, key_prefix=""):
     if localized_columns:
         localized_column_names = list(localized_columns.values())
         sort_column_localized = st.selectbox("Сортировать по столбцу:", localized_column_names, key=f"{key_prefix}_sort_column")
-        sort_column = list(localized_columns.keys())[localized_column_names.index(sort_column_localized)]
+        sort_column = sort_column_localized
     else:
         sort_column = st.selectbox("Сортировать по столбцу:", df.columns, key=f"{key_prefix}_sort_column")
 
