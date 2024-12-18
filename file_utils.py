@@ -7,62 +7,58 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Image as PD
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from image_utils import fetch_image
+from reportlab.lib.pagesizes import landscape
 
 
 # Регистрация шрифтов для PDF
 pdfmetrics.registerFont(TTFont('DejaVu', 'DejaVuSans.ttf'))
 pdfmetrics.registerFont(TTFont('DejaVu-Bold', 'DejaVuSans-Bold.ttf'))
 
-def export_to_pdf(df):
-    """Сохранение таблицы в PDF в стиле отображения"""
-    # Создаем PDF-документ
-    pdf_file_path = "temp_table.pdf"
-    pdf = SimpleDocTemplate(pdf_file_path, pagesize=letter)
-    
-    # Заголовки и данные
-    data = [df.columns.tolist()]  # Добавляем заголовки
+def export_to_pdf_dynamic_size(df):
+    """Экспорт таблицы в PDF с автоматической подстройкой размера страницы."""
+    # Определяем размеры холста
+    col_widths = [max(df[col].astype(str).map(len).max(), len(str(col))) * 7 for col in df.columns]
+    table_width = sum(col_widths)
+    table_height = len(df) * 20 + 50  # Высота строки примерно 20
 
-    # Рендер данных
-    for _, row in df.iterrows():
-        row_data = []
-        for col in df.columns:
-            if col == 'photo':  # Столбец с изображением
-                img = fetch_image(row[col])
-                if img:
-                    img_byte_arr = BytesIO()
-                    img.save(img_byte_arr, format='PNG')
-                    img_byte_arr.seek(0)
-                    pdf_image = PDFImage(img_byte_arr, width=50, height=50)  # Меняем размер для PDF
-                    row_data.append(pdf_image)
-                else:
-                    row_data.append("No Image")
-            else:
-                row_data.append(str(row[col]))
-        data.append(row_data)
+    # Настраиваем холст под размеры таблицы
+    page_size = (table_width + 20, table_height + 40)
 
-    # Создаем таблицу с визуальным стилем
-    table = Table(data)
+    # Создаём документ
+    pdf_file_path = "dynamic_table.pdf"
+    pdf = SimpleDocTemplate(
+        pdf_file_path, 
+        pagesize=page_size, 
+        topMargin=10, bottomMargin=10, leftMargin=10, rightMargin=10
+    )
+
+    # Подготовка данных для таблицы
+    data = [df.columns.tolist()] + df.astype(str).values.tolist()
+
+    # Создание таблицы
+    table = Table(data, colWidths=col_widths)
     style = TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),  # Цвет заголовков
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),  # Текст в заголовке
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),  # Выравнивание всех ячеек
-        ('FONTNAME', (0, 0), (-1, 0), 'DejaVu-Bold'),  # Шрифт для заголовков
-        ('FONTNAME', (0, 1), (-1, -1), 'DejaVu'),  # Шрифт для строк
-        ('FONTSIZE', (0, 0), (-1, 0), 10),  # Размер шрифта заголовка
-        ('FONTSIZE', (0, 1), (-1, -1), 8),  # Размер шрифта основного текста
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),  # Внутренний отступ заголовка
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),  # Сетка таблицы
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
     ])
     table.setStyle(style)
 
-    # Генерация PDF
+    # Сохраняем PDF
     pdf.build([table])
 
     # Читаем PDF как поток байтов
     with open(pdf_file_path, 'rb') as f:
         pdf_output = BytesIO(f.read())
-    
-    os.remove(pdf_file_path)  # Удаляем временный файл
+
+    # Удаляем временный файл
+    os.remove(pdf_file_path)
     
     return pdf_output
 
