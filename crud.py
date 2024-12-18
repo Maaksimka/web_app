@@ -135,7 +135,13 @@ def edit_form(selected_table, primary_column, selected_row):
     if not document:
         st.error(f"Запись с ключом {real_id, type(real_id)} не найдена. Искали {selected_row} в {second_column}")
         return
-
+    st.write("**Диагностическая информация**")
+    st.write(f"Выбранная таблица: `{selected_table}`")
+    st.write(f"Первичный столбец: `{primary_column}`")
+    st.write(f"Выбранная строка: `{selected_row}`")
+    st.write(f"Второй столбец: `{second_column}`")
+    st.write(f"Соответствующий real_id: `{real_id}`")
+    st.write(f"id_mapping: {st.session_state['id_mapping']}")
     with st.form(key="edit_form"):
         updated_record = render_form(fields, document, prefix="edit")
         submit = st.form_submit_button("Обновить запись")
