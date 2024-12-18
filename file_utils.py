@@ -14,7 +14,7 @@ from reportlab.lib.pagesizes import landscape
 pdfmetrics.registerFont(TTFont('DejaVu', 'DejaVuSans.ttf'))
 pdfmetrics.registerFont(TTFont('DejaVu-Bold', 'DejaVuSans-Bold.ttf'))
 
-def export_to_pdf_dynamic_size(df):
+def export_to_pdf(df):
     """Экспорт таблицы в PDF с автоматической подстройкой размера страницы."""
     # Определяем размеры холста
     col_widths = [max(df[col].astype(str).map(len).max(), len(str(col))) * 7 for col in df.columns]
