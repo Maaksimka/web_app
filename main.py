@@ -142,10 +142,29 @@ else:
     # Форма для редактирования записи (только для дилеров)
     if st.session_state['edit_mode'] and st.session_state['role'] == 'Дилер':
         edit_form(selected_table, primary_column, selected_row)
+    def find_second_column(collection_name):
+        """
+        Определяет название второго столбца, исключая _id, в коллекции MongoDB.
+        """
+        sample_document = db[collection_name].find_one()
+        if not sample_document:
+            return None
+        
+        columns = list(sample_document.keys())
+        # Нам нужно взять второй столбец (кроме _id)
+        for i in range(1, len(columns)):
+            if columns[i] != '_id':  # Пропускаем _id
+                return columns[i]
+        
+        return None  # Если нет второго столбца
 
+    # Пример использования:
+    second_column = find_second_column(selected_table)
+
+    
     # Логика добавления записи
     if st.session_state['add_mode']:
-        add_new_record(selected_table, primary_column)
+        add_new_record(selected_table, second_column)
 
     if selected_table == "Cars":
         save_card()
