@@ -37,17 +37,20 @@ def export_to_pdf(df):
 
     # Создание таблицы
     table = Table(data, colWidths=col_widths)
+        # Стиль для таблицы с поддержкой кириллицы
     style = TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTNAME', (0, 0), (-1, 0), 'DejaVu-Bold'),  # Изменено на шрифт с кириллицей
         ('FONTSIZE', (0, 0), (-1, 0), 10),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+        ('FONTNAME', (0, 1), (-1, -1), 'DejaVu'),      # Изменено на шрифт с кириллицей
         ('FONTSIZE', (0, 1), (-1, -1), 8),
         ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
     ])
+
     table.setStyle(style)
 
     # Сохраняем PDF
