@@ -130,13 +130,14 @@ else:
         with pdf_col:
             pdf_button = st.button("Скачать таблицу в PDF")
             if pdf_button:
-                pdf_output = export_to_pdf(sorted_df)  # Экспортируем текущую таблицу
+                full_table_pdf = export_to_pdf(df)  # Экспорт всей таблицы
                 st.download_button(
                     label="Скачать PDF",
-                    data=pdf_output,
-                    file_name=f"{selected_table}_table_{datetime.now().strftime('%Y-%m-%d')}.pdf",
+                    data=full_table_pdf,
+                    file_name=f"{selected_table}_full_table_{datetime.now().strftime('%Y-%m-%d')}.pdf",
                     mime="application/pdf",
                 )
+
 
     # Форма для редактирования записи (только для дилеров)
     if st.session_state['edit_mode'] and st.session_state['role'] == 'Дилер':
